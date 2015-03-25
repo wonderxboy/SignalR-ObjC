@@ -128,7 +128,13 @@
     }
     
     if(useDefault) {
-        return [URL stringByAppendingString:@"signalr"];
+        NSString *signalrPath = @"signalr";
+        
+        if (![URL hasSuffix:signalrPath]
+            && ![URL hasSuffix: [NSString stringWithFormat:@"%@/", signalrPath]])
+        {
+            return [URL stringByAppendingString:signalrPath];
+        }
     }
     
     return URL;
