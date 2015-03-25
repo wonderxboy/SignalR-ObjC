@@ -73,20 +73,16 @@
     SRSubscription *eventObj = _subscriptions[eventName];
     if(eventObj != nil && eventObj.object != nil) {
         NSMethodSignature *signature = [eventObj.object methodSignatureForSelector:eventObj.selector];
-        NSInvocation *invocation = [NSInvocation invocationWithMethodSignature:signature];
-        NSUInteger numberOfArguments = [signature numberOfArguments] - 2;
         
-        if (args.count != numberOfArguments) {
-            SRLogConnection(@"Callback for event '%@' is configured with %ld arguments, received %ld parameters instead.",eventName, (unsigned long)numberOfArguments, (unsigned long)args.count);
+        if (!signature) {
+            NSLog(@"Event %@ callback method signature error", eventName);
+            return;
         }
         
+        NSInvocation *invocation = [NSInvocation invocationWithMethodSignature:signature];
         [invocation setSelector:eventObj.selector];
         [invocation setTarget:eventObj.object];
-        for(int i =0; i< MIN([args count], numberOfArguments); i++) {
-            int arguementIndex = 2 + i;
-            __weak NSString *argument = args[i];
-            [invocation setArgument:&argument atIndex:arguementIndex];
-        }
+        [invocation setArgument:&args atIndex:2];
         [invocation invoke];
     }
 }
