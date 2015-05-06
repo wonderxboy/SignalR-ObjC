@@ -149,6 +149,54 @@
     [_connection send:hubData];
 }
 
+- (void)invoke:(NSString *)method withArgs:(NSArray *)args comeplexCompletionHandler:(void (^)(id response, NSError *error))block {
+    if(method == nil || [method isEqualToString:@""]) {
+        [NSException raise:NSInvalidArgumentException format:NSLocalizedString(@"Argument method is null",@"NSInvalidArgumentException")];
+    }
+    
+    if(args == nil) {
+        [NSException raise:NSInvalidArgumentException format:NSLocalizedString(@"Argument args is null",@"NSInvalidArgumentException")];
+    }
+    
+    NSString *callbackId = [_connection registerCallback:^(SRHubResult *hubResult) {
+        if (hubResult != nil) {
+            NSError *error = nil;
+            
+            if(![hubResult.error isKindOfClass:[NSNull class]] && hubResult.error != nil) {
+                NSMutableDictionary *userInfo = [NSMutableDictionary dictionary];
+                userInfo[NSLocalizedFailureReasonErrorKey] = NSInternalInconsistencyException;
+                userInfo[NSLocalizedDescriptionKey] = [NSString stringWithFormat:@"%@",hubResult.error];
+                error = [NSError errorWithDomain:[NSString stringWithFormat:NSLocalizedString(@"com.SignalR-ObjC.%@",@""),NSStringFromClass([self class])]
+                                                     code:0
+                                                 userInfo:userInfo];
+                [_connection didReceiveError:error];
+            }
+            
+            if(![hubResult.state isKindOfClass:[NSNull class]] && hubResult.state != nil) {
+                for (id key in hubResult.state) {
+                    [self setMember:key object:(hubResult.state)[key]];
+                }
+            }
+            
+            if (block != nil) {
+                block(hubResult.result, error);
+            }
+        }
+    }];
+    
+    SRHubInvocation *hubData = [[SRHubInvocation alloc] init];
+    hubData.hub = _hubName;
+    hubData.method = method;
+    hubData.args = [NSMutableArray arrayWithArray:args];
+    hubData.callbackId = callbackId;
+    
+    if (_state.count > 0) {
+        hubData.state = _state;
+    }
+    
+    [_connection send:hubData];
+}
+
 - (NSString *)description {     
     return [NSString stringWithFormat:@"HubProxy: Name=%@ State=%@ Subscriptions:%@",_hubName,_state,_subscriptions];
 }

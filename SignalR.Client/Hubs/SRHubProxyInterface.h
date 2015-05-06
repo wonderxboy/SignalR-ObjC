@@ -77,4 +77,6 @@
  */
 - (void)invoke:(NSString *)method withArgs:(NSArray *)args completionHandler:(void (^)(id response))block;
 
+
+- (void)invoke:(NSString *)method withArgs:(NSArray *)args complexCompletionHandler:(void (^)(id response, NSError *error))block;
 @end
