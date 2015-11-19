@@ -6,10 +6,10 @@
 //  Copyright (c) 2012 DyKnow LLC. All rights reserved.
 //
 
-#import <SenTestingKit/SenTestingKit.h>
+#import <XCTest/XCTest.h>
 #import "SignalR.h"
 
-@interface SRHubConnectionTests : SenTestCase
+@interface SRHubConnectionTests : XCTestCase
 
 @end
 
@@ -25,12 +25,12 @@
     [super tearDown];
 }
 
-/*- (void)testThrowIfCreateProxyAfterConnectionStarts
+- (void)testThrowIfCreateProxyAfterConnectionStarts
 {
-    SRHubConnection *connection  = [SRHubConnection connectionWithURL:@"http://site/"];
+    SRHubConnection *connection  = [SRHubConnection connectionWithURLString:@"http://site/"];
     
     [connection start];
-    STAssertThrowsSpecificNamed([connection createProxy:@"demo"], NSException, NSInternalInconsistencyException, @"Create proxy after start connection succeeded when it was expected to throw an exception") ;
-}*/
+    XCTAssertThrowsSpecific([connection createHubProxy:@"demo"], NSException, @"Create proxy after start connection succeeded when it was expected to throw an exception") ;
+}
 
 @end
